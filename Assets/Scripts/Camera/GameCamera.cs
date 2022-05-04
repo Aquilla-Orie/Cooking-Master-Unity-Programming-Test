@@ -15,6 +15,7 @@ public class GameCamera : MonoBehaviour
     {
         //Pan camera based off distance between the two players
         float playerDistance = Vector2.Distance(_player1.position, _player2.position);
-        _cam.orthographicSize = Mathf.Clamp(playerDistance, _minOrthographicSize, _maxOrthographicSize);
+        float targetOrthSize = Mathf.Clamp(playerDistance, _minOrthographicSize, _maxOrthographicSize);
+        _cam.orthographicSize = Mathf.Lerp(_cam.orthographicSize, targetOrthSize, Time.deltaTime);
     }
 }
