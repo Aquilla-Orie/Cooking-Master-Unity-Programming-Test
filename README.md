@@ -15,3 +15,7 @@ Created an abstract Player class that holds the core player logic, and two playe
 For now, the children player classes only implement movement.
 Updated camera script to allow smoother change in orthographic size.
 Camera now lerps between current orthographic size and target orthographic size.
+
+## Update 4
+Added vegetables, with different enum types. Player can interact with vegetable and add to collected vegetable queue.
+Player can no longer add veggie to queue if queue contains two veggies already or if player tries to pick the same veggie twice.
