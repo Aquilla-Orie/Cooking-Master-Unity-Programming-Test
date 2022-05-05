@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class PlayerOne : PlayerBase
 {
-    private void Update()
-    {
-        MovePlayer();
-    }
     public override void MovePlayer()
     {
         //Left
@@ -31,5 +27,10 @@ public class PlayerOne : PlayerBase
             transform.position += -_moveSpeed * Time.deltaTime * Vector3.up;
         }
 
+    }
+
+    public override void Interact()
+    {
+        base.Interact();
     }
 }
