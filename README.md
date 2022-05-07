@@ -11,11 +11,28 @@ This was done by simply calculating the distance between the two players and adj
 between two clamped values based off the distance.
 
 ## Update 3
-Created an abstract Player class that holds the core player logic, and two player classes (PlayerOne.cs, and PlayerTwo.cs).
+<ul>
+  <li>Created an abstract Player class that holds the core player logic, and two player classes (PlayerOne.cs, and PlayerTwo.cs):
 For now, the children player classes only implement movement.
-Updated camera script to allow smoother change in orthographic size.
-Camera now lerps between current orthographic size and target orthographic size.
+  <li>Updated camera script to allow smoother change in orthographic size.
+  <li>Camera now lerps between current orthographic size and target orthographic size.
+</ul>
 
 ## Update 4
 Added vegetables, with different enum types. Player can interact with vegetable and add to collected vegetable queue.
-Player can no longer add veggie to queue if queue contains two veggies already or if player tries to pick the same veggie twice.
+<br>Player can no longer add veggie to queue if queue contains two veggies already or if player tries to pick the same veggie twice.
+
+## Update 5
+### Chopping Board
+<ul>
+  <li>Added two chopping boards.
+  <li>Players can drop vegetables on the chopping board: Veggie type is added to stack on chopping board script in order to keep track of veggies.
+  <li>While using the chopping board, player's movement is restricted: player move speed is set to 0.
+  <li>Player can pickup vegetables from the chopping board: veggie stack is retrieved from the chopping board script to the player script
+  <li>Seperate button for picking up prepared vegetables from the board. This helps reduce complexity in figuring out when the board is ready for pickup. By this, the player can pickup what ever is placed on the board at any time.
+  <li>Board is limited to 3 vegetables per time. This variable can be adjusted if necessary.
+</ul>
+
+### Helper script
+Implemented a helper script with the namespace Helpers. This contains helper methods that provide custom or in some cases, slightly optimized functionality.
+<br>The script currently only implements a CloneStack() that clones a stack in order and returns the cloned stack.
