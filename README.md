@@ -36,3 +36,20 @@ Added vegetables, with different enum types. Player can interact with vegetable 
 ### Helper script
 Implemented a helper script with the namespace Helpers. This contains helper methods that provide custom or in some cases, slightly optimized functionality.
 <br>The script currently only implements a CloneStack() that clones a stack in order and returns the cloned stack.
+
+## Update 6
+### Customer Interaction With Player
+Created CustomerManager that handles spawning customers to tables and removes them when they are done.
+<br>Customer spawning and destruction are done by button presses at the moment, but work perfectly.
+<br>Player can submit food to table, which is then received and inspected by the customer. Matching orders are rewarded, and the serving player is penalized for mismatched orders.
+<br>Customer timer starts counting as soon as the customer is settled on the table. Depending on the type of order, the time varies (smaller orders require shorter periods of time, longer orders, more time).
+If the time runs out before the customer is served, both players are penalized.
+<br>Had some design issues implementing the score system: Player references the ScoreManager to compute the score and recieves the value calculated. I had to simplify and move some of the logic to the PlayerBase class because the dependencies were becoming troubling. The downside is that there is some 'tight' coupling in the logic.
+<br>I might have to implement the same with the UIManager when I implement it; only the most general functionalities would be handled by the UIManager (like displaying player scores, time, ui prompts), other more specific UI elements like veggies displaying their type, and customer orders printed on the table would be handled by the individual classes. This is to prevent passing a lot of objects around that can otherwise be handled by the class holding such data.
+
+### Helper Script
+Two new helper methods have been added to the Helper script:
+<ol>
+  <li>public static T RandomEnumValue<T>() which returns a single random value from an enumeration of type T
+  <li>public static T[] GetDistinctEnumValues<T>(int size) which returns an array of distinct values from an enumeration
+</ol>
