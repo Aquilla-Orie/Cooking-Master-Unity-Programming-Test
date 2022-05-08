@@ -43,6 +43,11 @@ public class ChoppingBoard : MonoBehaviour
         _currentNumberOfVeggiesOnBoard = 0;
         IsChoppingBoardFull = false;
 
+        foreach (var item in tempHolder)
+        {
+            Debug.Log($"Veggie {item} has been picked up from the board");
+        }
+
         return tempHolder;
     }
 }

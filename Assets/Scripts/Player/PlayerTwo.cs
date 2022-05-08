@@ -32,4 +32,9 @@ public class PlayerTwo : PlayerBase
     {
         base.Interact();
     }
+
+    public override void DeductPointsAllPlayers()
+    {
+        base.DeductPointsAllPlayers();
+    }
 }

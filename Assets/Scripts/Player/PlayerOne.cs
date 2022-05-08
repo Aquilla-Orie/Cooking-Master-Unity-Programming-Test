@@ -33,4 +33,9 @@ public class PlayerOne : PlayerBase
     {
         base.Interact();
     }
+
+    public override void DeductPointsAllPlayers()
+    {
+        base.DeductPointsAllPlayers();
+    }
 }
