@@ -53,3 +53,16 @@ Two new helper methods have been added to the Helper script:
   <li>public static T RandomEnumValue<T>() which returns a single random value from an enumeration of type T
   <li>public static T[] GetDistinctEnumValues<T>(int size) which returns an array of distinct values from an enumeration
 </ol>
+
+## Update 7
+### Bonus and Pickups
+Added bonus and pickups which the player can walk over to collect. If the player serves the customer within 70% of the custome's waiting time, a bonus is dropped. This could either be speed, score or time bonus.
+
+### UI
+<ol>
+<li>UI has been updated. Plates now carry the letter of the vegetable that is on them. The chopping board also shows the combination of vegetables that are added on them.
+<li>The player has UI indications of what vegetable he is carrying, and another that shows whether or not he has picked up a plate from the chopping board to serve the customer.
+<li>Slider on the player's head to indicate that he is using the chopping board
+<li>Help Menu displays when any player presses the 'H' Key
+<li>Gameover menu added after both players run out of time.
+</ol>
