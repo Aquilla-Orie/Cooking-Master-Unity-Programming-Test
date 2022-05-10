@@ -2,9 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using System;
 
 public class ChoppingBoard : MonoBehaviour
 {
+    [SerializeField] private TMP_Text _boardText;//Shows all the vegetables placed on the chopping board
+
     private int _maxVeggieCapacity = 3; //Maximum number of veggies that can be on the board per time
     private int _currentNumberOfVeggiesOnBoard; //number of veggies on the board at the moment
 
@@ -32,7 +36,11 @@ public class ChoppingBoard : MonoBehaviour
         if (_currentNumberOfVeggiesOnBoard >= _maxVeggieCapacity) IsChoppingBoardFull = true;
 
         _veggiesOnChoppingBoard.Push(veggie.GetVeggieType());
-        Debug.Log($"Veggie {_veggiesOnChoppingBoard.Peek()} had been added to the chopping board");
+
+        var plateArray = _veggiesOnChoppingBoard.ToArray();
+
+        Array.Reverse(plateArray);//Reverse the stack for correct display
+        _boardText.text = string.Join(",", plateArray);
     }
 
     public Stack<VeggieType> RemoveVeggiesFromBoard()
@@ -43,10 +51,7 @@ public class ChoppingBoard : MonoBehaviour
         _currentNumberOfVeggiesOnBoard = 0;
         IsChoppingBoardFull = false;
 
-        foreach (var item in tempHolder)
-        {
-            Debug.Log($"Veggie {item} has been picked up from the board");
-        }
+        _boardText.text = string.Empty;
 
         return tempHolder;
     }

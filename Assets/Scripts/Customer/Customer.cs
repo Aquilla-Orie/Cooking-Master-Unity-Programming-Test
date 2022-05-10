@@ -9,6 +9,7 @@ public class Customer : MonoBehaviour
 {
     [SerializeField] private Slider _waitingTimeSlider;
 
+    private CustomerManager _customerManager; //reference to the customer manager 
     private PlayerBase _playerServing;//Which player served the customer the plate
     private Stack<VeggieType> _plateServedByPlayer;
 
@@ -16,11 +17,17 @@ public class Customer : MonoBehaviour
     private string _order;
     private int _maxOrderLength = 3; //max number of veggies per order a customer can generate
     private float _waitingTime; //Determined by order length
+    private float _70PercentwaitingTime; //Calculate 70% of the waiting time
     private float _minWaitingTime;
     private float _maxWaitingTime;
 
-
     public Table _customerTable;
+
+    //Custom custructor to setup customer manager
+    public void Init(CustomerManager manager)
+    {
+        _customerManager = manager;
+    }
 
     private void Awake()
     {
@@ -58,23 +65,23 @@ public class Customer : MonoBehaviour
                 break;
         }
         _waitingTime = UnityEngine.Random.Range(_minWaitingTime, _maxWaitingTime + 1);
+        _70PercentwaitingTime = .7f * _waitingTime;
     }
 
     private IEnumerator WaitingTimerCountdown()
     {
-        float timer = _waitingTime;
         _waitingTimeSlider.maxValue = _waitingTime;
 
-        while (timer >= 0f && !_hasBeenServed)
+        while (_waitingTime >= 0f && !_hasBeenServed)
         {
-            _waitingTimeSlider.value = timer;
-            timer -= Time.deltaTime;
+            _waitingTimeSlider.value = _waitingTime;
+            _waitingTime -= Time.deltaTime;
             yield return null;
         }
 
         //Customer is angry, has not been served within waiting time
         DeductBothPlayerPoints();
-        DestroySelf();
+        _customerManager.RemoveCustomer(this);
 
         yield break;
     }
@@ -129,16 +136,20 @@ public class Customer : MonoBehaviour
         {
             //Punish player for serving wrong combination
             _playerServing.DeductPlayerScore();
-            DestroySelf();
+            _customerManager.RemoveCustomer(this);
+
             return;
         }
 
         //Reward player for serving right combination
         _playerServing.AddPlayerScore();
         //Check if player served within time and add bonus
+        if (_waitingTime >= _70PercentwaitingTime)
+        {
+            PickupManager.Instance.SpawnRandomPickupForPlayer(_playerServing);
+        }
 
-
-        DestroySelf();
+        _customerManager.RemoveCustomer(this);
     }
 
 }

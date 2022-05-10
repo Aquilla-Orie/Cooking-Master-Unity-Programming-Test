@@ -11,7 +11,8 @@ public class CustomerManager : MonoBehaviour
     [SerializeField] private List<Customer> _customers;
 
     private int _numberOfCustomersToSpawn;
-
+    private float _initialInvokeWaitTime = 2f;//Time before generate customer method is invocated, in seconds
+    private float _repeatingInvokeInterval = 60f;//Interval between generate customer invocation, in seconds
     private List<Table> _freeTables;
 
     private void Awake()
@@ -21,18 +22,11 @@ public class CustomerManager : MonoBehaviour
         _customers = new List<Customer>();
     }
 
-    private void Update()
+    private void Start()
     {
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            GenerateCustomer();
-        }
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            RemoveCustomer();
-        }
+        //Start generating customers after _initialInvokeWaitTime and repeat every _repeatingInvokeInterval
+        InvokeRepeating("GenerateCustomer", _initialInvokeWaitTime, _repeatingInvokeInterval);
     }
-
 
     //Generate customer on free table
     private void GenerateCustomer()
@@ -51,6 +45,9 @@ public class CustomerManager : MonoBehaviour
             //Pick a random free table and spawn customers there
             var table = _freeTables[Random.Range(0, _freeTables.Count)];
             var customer = Instantiate(_customerObject, table._customerPositionOnTable.transform);
+
+            //Call customer constructor to setup manager
+            customer.Init(this);
 
             _customers.Add(customer);
 
@@ -77,14 +74,21 @@ public class CustomerManager : MonoBehaviour
 
 
     //Remove customer from table
-    public void RemoveCustomer()
+    public void RemoveCustomer(Customer customer)
     {
         if (_customers.Count <= 0) return;
 
-        var index = Random.Range(0, _customers.Count);
-        Customer c = _customers[index];
+        _customers.Remove(customer);
+        customer.DestroySelf();
+    }
 
-        _customers.Remove(c);
-        c.DestroySelf();
+    public void RemoveAllCustomers()
+    {
+        var customers = FindObjectsOfType<Customer>();
+
+        foreach (var customer in customers)
+        {
+            RemoveCustomer(customer);
+        }
     }
 }

@@ -3,31 +3,61 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public abstract class PlayerBase : MonoBehaviour
 {
-    [SerializeField] private int _playerScore;
+    private int _playerScore;
 
     protected float _moveSpeed = 2f;
 
+    [Header("Managers")]
+    [Space(20)]
     [SerializeField] protected ScoreManager _scoreManager;
+    [SerializeField] protected UIManager _uiManager;
 
+    [Header("Interactions")]
+    [Space(20)]
     [SerializeField] protected ChoppingBoard _choppingBoard;
     [SerializeField] protected SidePlate _sidePlate;
     [SerializeField] protected Table _table;
     [SerializeField] protected Trash _trashCan;
     [SerializeField] protected Veggie _veggie;
 
+    [Header("Buttons")]
+    [Space(20)]
     [SerializeField] protected KeyCode _interactKey;//Button used by each player to interact
     [SerializeField] protected KeyCode _pickupFromChoppingBoardKey;//Button used by each player to pickup from the chopping board
+
+    [Header("UI")]
+    [Space(20)]
+    [SerializeField] private TMP_Text _veggie1Text;//Displays the first veggie picked up
+    [SerializeField] private TMP_Text _veggie2Text;//Displays the second veggie picked up
+    [SerializeField] private Image _platePickedUpImage;//Shows whether or not player has pickeup up plate
+    [SerializeField] private Slider _waitingSlider;//Shows whether or not player has pickeup up plate
+
 
     protected Queue<Veggie> _veggiesPickedUp;//Unprepared Veggies picked up side tables
     protected Stack<VeggieType> _veggiesPrepared;//Prepared Veggied picked up from chopping board
 
-    public int PlayerScore { get => _playerScore; set => _playerScore = value; }
+    public bool CanPlay { get; set; }
+
+    public int PlayerScore
+    {
+        get => _playerScore;
+
+        set
+        {
+            _playerScore = value;
+            UpdateScoreText();
+        } 
+    }
 
     private void Awake()
     {
+        CanPlay = true;
+
         _playerScore = 0;
 
         _veggiesPickedUp = new Queue<Veggie>();
@@ -36,6 +66,8 @@ public abstract class PlayerBase : MonoBehaviour
 
     private void Update()
     {
+        if (!CanPlay) return;
+
         MovePlayer();
         Interact();
     }
@@ -45,28 +77,59 @@ public abstract class PlayerBase : MonoBehaviour
         //Implement in player child class
     }
 
-    public virtual void DeductPointsAllPlayers()
+    public virtual void UpdateScoreText()
     {
-        PlayerScore = _scoreManager.DeductPlayerScore(PlayerScore, 2);
+        //Implement in player child class
     }
-
-    public void DeductPlayerScore()
+    public virtual void UpdateTimerText(int timeLeft)
     {
-        Debug.Log($"Removing 2 to player {name}");
-        PlayerScore = _scoreManager.DeductPlayerScore(PlayerScore, 2);
+        //Implement in player child class
     }
-    public void AddPlayerScore()
-    {
-        Debug.Log($"Adding 2 to player {name}");
-        PlayerScore = _scoreManager.AddPlayerScore(PlayerScore, 2);
-    }
-
 
     //Return plate prepared
     public Stack<VeggieType> GetVeggiePlate()
     {
         return _veggiesPrepared;
     }
+
+
+    #region Bonus
+    public void AddBonusScore()
+    {
+        PlayerScore = _scoreManager.AddPlayerScore(PlayerScore, 10);
+    }
+    public void IncreaseSpeed(float tempSpeed, float time)
+    {
+        StartCoroutine(TemporarySpeedIncrease());
+
+        IEnumerator TemporarySpeedIncrease()
+        {
+            float tempHolder = _moveSpeed;//Store default speed for a while
+
+            _moveSpeed = tempSpeed;//Increase speed
+
+            yield return new WaitForSeconds(time);
+
+            _moveSpeed = tempHolder;//Set default speed back after time
+        }
+    }
+    #endregion
+
+    #region Score
+    public virtual void DeductPointsAllPlayers()
+    {
+        PlayerScore = _scoreManager.DeductPlayerScore(PlayerScore, 10);
+    }
+
+    public void DeductPlayerScore()
+    {
+        PlayerScore = _scoreManager.DeductPlayerScore(PlayerScore, 10);
+    }
+    public void AddPlayerScore()
+    {
+        PlayerScore = _scoreManager.AddPlayerScore(PlayerScore, 20);
+    }
+    #endregion
 
     #region CollisionDetection
     private void OnTriggerEnter2D(Collider2D collider)
@@ -163,6 +226,7 @@ public abstract class PlayerBase : MonoBehaviour
          
         //Clear plate for next service
         _veggiesPrepared.Clear();
+        _platePickedUpImage.gameObject.SetActive(false);//Hide plate ui
     }
 
     private void InteractWithSidePlate()
@@ -176,6 +240,7 @@ public abstract class PlayerBase : MonoBehaviour
         if (_sidePlate.HasVeggieOnPlate && !playerHasFullHands)
         {
             _veggiesPickedUp.Enqueue(_sidePlate.PickupVeggieFromPlate());
+            SetVegetableText(_veggiesPickedUp.Last().GetVeggieType());
             return;
         }
 
@@ -183,8 +248,23 @@ public abstract class PlayerBase : MonoBehaviour
         if (!_sidePlate.HasVeggieOnPlate && _veggiesPickedUp.Count > 0)
         {
             _sidePlate.DropVeggieOnPlate(_veggiesPickedUp.Dequeue());
+            ClearVeggieText();
             return;
         } 
+    }
+
+    private void ClearVeggieText()
+    {
+        if (_veggie1Text.text != String.Empty)//Space 1 is occupied
+        {
+            _veggie1Text.text = String.Empty;
+            return;
+        }
+        if (_veggie2Text.text != String.Empty)//Space 2 is occupied
+        {
+            _veggie2Text.text = String.Empty;
+            return;
+        }
     }
 
     private void InteractWithTrashCan()
@@ -198,6 +278,7 @@ public abstract class PlayerBase : MonoBehaviour
 
         //Trash the plate
         _veggiesPrepared.Clear();
+        _platePickedUpImage.gameObject.SetActive(false);//Hide plate ui
 
         //Deduct points
         _playerScore = _scoreManager.DeductPlayerScore(_playerScore, 2);
@@ -207,6 +288,8 @@ public abstract class PlayerBase : MonoBehaviour
     {
         //Player cannot pickup from board if hands are full with veggies or already has a plate in hand
         if (_veggiesPickedUp.Count >= 2 || _veggiesPrepared.Count > 0) return;
+
+        _platePickedUpImage.gameObject.SetActive(true);//Show picked plate UI
         _veggiesPrepared = _choppingBoard.RemoveVeggiesFromBoard();
     }
 
@@ -218,15 +301,29 @@ public abstract class PlayerBase : MonoBehaviour
         StartCoroutine(DelayPlayerWhileChopping());
         _choppingBoard.AddVeggieToBoard(_veggiesPickedUp.Dequeue());
 
+        ClearVeggieText();
+
         IEnumerator DelayPlayerWhileChopping()
         {
+            _waitingSlider.gameObject.SetActive(true);//Show waiting slider
+
             _choppingBoard.IsChoppingBoardBusy = true;
-            _moveSpeed = 0;
-            Debug.Log($"Player {name} can no longer move");
-            yield return new WaitForSeconds(1f);
-            _moveSpeed = 2f;
+            _moveSpeed = 0;//Stop player from moving
+
+            float timer = 0f;
+            float waitingTime = 1f;//Waiting time while using the chopping board
+
+            while (timer <= 1f)
+            {
+                _waitingSlider.value = timer;
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            _waitingSlider.gameObject.SetActive(false);//hide waiting slider
+
+            _moveSpeed = 2f;//Allow player to move
             _choppingBoard.IsChoppingBoardBusy = false;
-            Debug.Log($"Player {name} can now move");
         }
     }
 
@@ -242,9 +339,23 @@ public abstract class PlayerBase : MonoBehaviour
             _veggiesPickedUp.Enqueue(_veggie);
             _veggie = null;
 
-            Debug.Log($"{_veggiesPickedUp.Last().name} added to queue");
+            //Set Text for vegetables
+            SetVegetableText(_veggiesPickedUp.Last().GetVeggieType());
         }
         Debug.Log($"{_veggiesPickedUp.Count} elements in the queue");
     }
     #endregion
+    private void SetVegetableText(VeggieType veggieType)
+    {
+        if (_veggie1Text.text == String.Empty)//Space 1 is free
+        {
+            _veggie1Text.text = veggieType.ToString();
+            return;
+        }
+        if (_veggie2Text.text == String.Empty)//Space 2 is free
+        {
+            _veggie2Text.text = veggieType.ToString();
+            return;
+        }
+    }
 }

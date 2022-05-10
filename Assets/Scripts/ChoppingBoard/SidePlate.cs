@@ -1,9 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class SidePlate : MonoBehaviour
 {
+    [SerializeField] private TMP_Text _sidePlateText;
+
     private bool _hasVeggieOnPlate;
     private Veggie _veggieOnPlate;
 
@@ -16,7 +20,8 @@ public class SidePlate : MonoBehaviour
 
         _veggieOnPlate = veggie;
         HasVeggieOnPlate = true;
-        Debug.Log($"Veggie {veggie.GetVeggieType()} is on the side plate");
+
+        _sidePlateText.text = veggie.GetVeggieType().ToString();
     }
 
     //Return veggie to player
@@ -27,7 +32,9 @@ public class SidePlate : MonoBehaviour
         var temp = _veggieOnPlate;
         _veggieOnPlate = null;
         HasVeggieOnPlate = false;
-        Debug.Log($"Veggie {temp.GetVeggieType()} removed from side plate");
+
+        _sidePlateText.text = String.Empty;
+
         return temp;
     }
 }

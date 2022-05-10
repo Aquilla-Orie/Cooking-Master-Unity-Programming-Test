@@ -38,4 +38,16 @@ public class PlayerOne : PlayerBase
     {
         base.DeductPointsAllPlayers();
     }
+
+    public override void UpdateScoreText()
+    {
+        base.UpdateScoreText();
+        _uiManager.UpdatePlayerOneScoreText(PlayerScore);
+    }
+
+    public override void UpdateTimerText(int timeLeft)
+    {
+        base.UpdateTimerText(timeLeft);
+        _uiManager.UpdatePlayerOneTimerText(timeLeft);
+    }
 }
